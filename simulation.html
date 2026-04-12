@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Code Generation — Sai Naveen</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080c14;--surface:#0f1623;--card:#131b2a;--border:#1e2d42;--border2:#243448;--accent:#00c2ff;--accent2:#0077ff;--accent3:#00ffc8;--text:#dce8f5;--muted:#5a7fa0;--danger:#ff4466;--warn:#f59e0b;--ok:#00ffc8;--purple:#a78bfa;--yellow:#fbbf24;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);padding:0 0 60px;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,194,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,194,255,.04) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;}
+.page{max-width:1200px;margin:0 auto;padding:0 20px;position:relative;z-index:1;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.phase-tag{display:inline-flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:var(--accent3);letter-spacing:.12em;padding:5px 12px;border-radius:4px;background:rgba(0,255,200,.07);border:1px solid rgba(0,255,200,.18);margin-bottom:14px;}
+.phase-tag::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent3);animation:blink 1.4s infinite;}
+h1{font-size:clamp(26px,4vw,38px);font-weight:800;letter-spacing:-.02em;line-height:1.1;background:linear-gradient(120deg,#dce8f5 30%,#00c2ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
+.sub{font-size:14px;color:var(--muted);line-height:1.6;max-width:480px;}
+header{padding:48px 0 36px;display:flex;align-items:flex-start;justify-content:space-between;gap:24px;flex-wrap:wrap;border-bottom:1px solid var(--border);margin-bottom:32px;}
+.header-right{text-align:right;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;min-width:220px;}
+.student-label{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:.08em;margin-bottom:6px;}
+.student-name{font-size:17px;font-weight:700;color:var(--text);}
+.student-reg{font-family:'Space Mono',monospace;font-size:12px;color:var(--accent);margin-top:4px;}
+.course-tag{font-size:11px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.how-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 24px;margin-bottom:24px;}
+.how-title{font-size:11px;font-weight:700;color:var(--accent3);letter-spacing:.1em;font-family:'Space Mono',monospace;margin-bottom:16px;}
+.how-steps{display:grid;grid-template-columns:repeat(6,1fr);gap:0;}
+@media(max-width:700px){.how-steps{grid-template-columns:repeat(3,1fr);}}
+.how-step{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 8px;position:relative;}
+.how-step:not(:last-child)::after{content:'';position:absolute;right:0;top:18px;width:1px;height:36px;background:var(--border2);}
+.how-icon{width:36px;height:36px;border-radius:50%;background:rgba(0,194,255,.1);border:1px solid rgba(0,194,255,.25);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;}
+.how-label{font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.how-desc{font-size:10px;color:var(--muted);line-height:1.5;}
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px;}
+@media(max-width:640px){.stats-row{grid-template-columns:repeat(3,1fr);}}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.stat-n{font-size:26px;font-weight:800;color:var(--text);line-height:1;}
+.stat-l{font-size:11px;color:var(--muted);margin-top:5px;font-family:'Space Mono',monospace;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.015);}
+.card-title{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.1em;font-family:'Space Mono',monospace;}
+.asm-scroll{overflow-x:auto;}
+.asm-table{width:100%;border-collapse:collapse;font-family:'Space Mono',monospace;font-size:12px;}
+.asm-table th{padding:9px 14px;text-align:left;font-size:10px;color:var(--muted);letter-spacing:.08em;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);white-space:nowrap;}
+.asm-table td{padding:7px 14px;border-bottom:1px solid rgba(30,45,66,.45);vertical-align:middle;white-space:nowrap;}
+.asm-table tr:last-child td{border-bottom:none;}
+.asm-table tr:hover td{background:rgba(0,194,255,.04);}
+.row-section td{background:rgba(0,194,255,.04);color:var(--accent3);font-weight:700;font-size:11px;letter-spacing:.08em;padding:10px 14px 5px;}
+.row-label td{color:var(--yellow);font-weight:700;padding:10px 14px 4px;font-size:12px;}
+.lineno{color:var(--muted2);font-size:11px;min-width:36px;text-align:right;padding-right:10px;}
+.instr{color:var(--accent);font-weight:700;min-width:80px;}
+.operands{color:#c4d9f0;min-width:200px;}
+.comment-cell{color:var(--muted);font-style:italic;}
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700;}
+.b-mov{background:rgba(0,194,255,.12);color:var(--accent);}
+.b-arith{background:rgba(167,139,250,.12);color:var(--purple);}
+.b-cmp{background:rgba(251,191,36,.12);color:var(--yellow);}
+.b-jmp{background:rgba(255,68,102,.12);color:var(--danger);}
+.b-ret{background:rgba(0,255,200,.12);color:var(--accent3);}
+.b-stack{background:rgba(96,165,250,.12);color:#60a5fa;}
+.b-misc{background:rgba(148,163,184,.12);color:#94a3b8;}
+.reg-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:18px;}
+@media(max-width:600px){.reg-grid{grid-template-columns:repeat(3,1fr);}}
+.reg-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;}
+.reg-name{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:6px;}
+.reg-val{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--accent3);}
+footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.foot-left{color:var(--muted);font-size:13px;}
+.foot-left strong{color:var(--text);}
+.foot-right{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);}
+.foot-right span{color:var(--accent);}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:var(--surface);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <div>
+    <div class="phase-tag">PHASE 4 &nbsp;—&nbsp; COMPILER DESIGN</div>
+    <h1>Code Generation</h1>
+    <p class="sub">Final compiler phase — x86-64 target assembly generated from IR. Includes register allocation, stack frame setup, control flow, loops and function calls.</p>
+  </div>
+  <div class="header-right">
+    <div class="student-label">SUBMITTED BY</div>
+    <div class="student-name">Sai Naveen</div>
+    <div class="student-reg">RA2311003050059</div>
+    <div class="course-tag">Compiler Design — Code Generation Lab</div>
+  </div>
+</header>
+
+<div class="how-card">
+  <div class="how-title">HOW CODE GENERATION WORKS</div>
+  <div class="how-steps">
+    <div class="how-step"><div class="how-icon">01</div><div class="how-label">IR Input</div><div class="how-desc">Three-address code from optimizer</div></div>
+    <div class="how-step"><div class="how-icon">02</div><div class="how-label">Reg Alloc</div><div class="how-desc">Variables mapped to CPU registers</div></div>
+    <div class="how-step"><div class="how-icon">03</div><div class="how-label">Instr Select</div><div class="how-desc">IR ops → MOV / ADD / CMP etc.</div></div>
+    <div class="how-step"><div class="how-icon">04</div><div class="how-label">Stack Frame</div><div class="how-desc">RBP/RSP setup, local var offsets</div></div>
+    <div class="how-step"><div class="how-icon">05</div><div class="how-label">Jump Patch</div><div class="how-desc">Labels resolved to target addresses</div></div>
+    <div class="how-step"><div class="how-icon">06</div><div class="how-label">Emit</div><div class="how-desc">Final x86-64 assembly produced</div></div>
+  </div>
+</div>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-n">67</div><div class="stat-l">TOTAL LINES</div></div>
+  <div class="stat-card"><div class="stat-n">28</div><div class="stat-l">MOV OPS</div></div>
+  <div class="stat-card"><div class="stat-n">8</div><div class="stat-l">ARITH OPS</div></div>
+  <div class="stat-card"><div class="stat-n">10</div><div class="stat-l">JUMPS / CMP</div></div>
+  <div class="stat-card"><div class="stat-n" style="color:var(--yellow)">9</div><div class="stat-l">LABELS</div></div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <span class="card-title">REGISTER ALLOCATION MAP</span>
+    <span style="font-size:11px;color:var(--muted);font-family:'Space Mono',monospace">x86-64 GPRs used</span>
+  </div>
+  <div class="reg-grid">
+    <div class="reg-card"><div class="reg-name">EAX</div><div class="reg-val">a / retval</div></div>
+    <div class="reg-card"><div class="reg-name">EBX</div><div class="reg-val">b (3.14)</div></div>
+    <div class="reg-card"><div class="reg-name">ECX</div><div class="reg-val">c (temp)</div></div>
+    <div class="reg-card"><div class="reg-name">EDX</div><div class="reg-val">d = a+c</div></div>
+    <div class="reg-card"><div class="reg-name">ESI</div><div class="reg-val">sum acc</div></div>
+    <div class="reg-card"><div class="reg-name">EDI</div><div class="reg-val">cond bool</div></div>
+    <div class="reg-card"><div class="reg-name">R8D</div><div class="reg-val">cond bool</div></div>
+    <div class="reg-card"><div class="reg-name">R9D</div><div class="reg-val">and result</div></div>
+    <div class="reg-card"><div class="reg-name">RBP</div><div class="reg-val">base ptr</div></div>
+    <div class="reg-card"><div class="reg-name">RSP</div><div class="reg-val">stack ptr</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <span class="card-title">GENERATED ASSEMBLY — x86-64</span>
+    <span style="font-size:11px;color:var(--muted);font-family:'Space Mono',monospace">NASM syntax</span>
+  </div>
+  <div class="asm-scroll">
+  <table class="asm-table">
+    <thead><tr><th>#</th><th>INSTRUCTION</th><th>OPERANDS</th><th>TYPE</th><th>DESCRIPTION</th></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-left">Name: <strong>Sai Naveen</strong> &nbsp;|&nbsp; Reg No: <strong>RA2311003050059</strong></div>
+  <div class="foot-right">Compiler Design &nbsp;—&nbsp; <span>Phase 4: Code Generation</span></div>
+</footer>
+</div>
+
+<script>
+const rows=[
+  {s:'DATA SECTION'},
+  {lbl:'section .data'},
+  {n:'D1',op:'_str0: db',operands:'"hello", 0',type:'b-misc',desc:'string literal in data segment'},
+  {s:'TEXT SECTION — ENTRY'},
+  {lbl:'section .text'},
+  {lbl:'global _start'},
+  {lbl:'main:'},
+  {n:'1',op:'push',operands:'rbp',type:'b-stack',desc:'save caller base pointer'},
+  {n:'2',op:'mov',operands:'rbp, rsp',type:'b-mov',desc:'set up new stack frame'},
+  {n:'3',op:'sub',operands:'rsp, 128',type:'b-arith',desc:'reserve 128 bytes on stack for locals'},
+  {s:'VARIABLE INITIALISATION'},
+  {n:'4',op:'mov',operands:'EAX, 10',type:'b-mov',desc:'a = 10'},
+  {n:'5',op:'mov',operands:'EBX, 3.14',type:'b-mov',desc:'b = 3.14'},
+  {n:'6',op:'mov',operands:'ECX, 5',type:'b-mov',desc:'c = 5'},
+  {s:'ARITHMETIC OPERATIONS'},
+  {n:'7',op:'imul',operands:'ECX, 2',type:'b-arith',desc:'c = c * 2  →  5*2 = 10'},
+  {n:'8',op:'mov',operands:'EDX, EAX',type:'b-mov',desc:'d = a  →  load a into EDX'},
+  {n:'9',op:'add',operands:'EDX, ECX',type:'b-arith',desc:'d = a + c  →  10+10 = 20'},
+  {n:'10',op:'mov',operands:'ESI, EDX',type:'b-mov',desc:'sum = d  →  ESI accumulator'},
+  {n:'11',op:'mov',operands:'EDI, EAX',type:'b-mov',desc:'load a into EDI for condition'},
+  {s:'CONDITION: a >= 5 (boolean into EDI)'},
+  {n:'12',op:'cmp',operands:'EDI, 5',type:'b-cmp',desc:'compare a with 5'},
+  {n:'13',op:'setge',operands:'al',type:'b-misc',desc:'al = 1 if a >= 5'},
+  {n:'14',op:'movzx',operands:'EDI, al',type:'b-mov',desc:'zero-extend al → EDI (bool)'},
+  {n:'15',op:'mov',operands:'R8D, EBX',type:'b-mov',desc:'load b into R8D for condition'},
+  {s:'CONDITION: b != 0 (boolean into R8D)'},
+  {n:'16',op:'cmp',operands:'R8D, 0',type:'b-cmp',desc:'compare b with 0'},
+  {n:'17',op:'setne',operands:'al',type:'b-misc',desc:'al = 1 if b != 0'},
+  {n:'18',op:'movzx',operands:'R8D, al',type:'b-mov',desc:'zero-extend al → R8D (bool)'},
+  {s:'LOGICAL AND: (a>=5) && (b!=0)'},
+  {n:'19',op:'mov',operands:'R9D, EDI',type:'b-mov',desc:'R9D = cond1'},
+  {n:'20',op:'and',operands:'R9D, R8D',type:'b-arith',desc:'R9D = cond1 AND cond2'},
+  {n:'21',op:'cmp',operands:'R9D, 0',type:'b-cmp',desc:'test combined condition'},
+  {n:'22',op:'jne',operands:'L0',type:'b-jmp',desc:'if true → jump to L0 (then branch)'},
+  {n:'23',op:'jmp',operands:'L1',type:'b-jmp',desc:'else → jump to L1'},
+  {s:'LABEL L0 — THEN BRANCH (condition true)'},
+  {lbl:'L0:'},
+  {n:'24',op:'lea',operands:'rdi, [_str0]',type:'b-mov',desc:'load address of "hello" string'},
+  {n:'25',op:'push',operands:'rdi',type:'b-stack',desc:'push string arg onto stack'},
+  {n:'26',op:'call',operands:'printf',type:'b-misc',desc:'call printf("hello")'},
+  {n:'27',op:'add',operands:'rsp, 8',type:'b-arith',desc:'clean printf argument off stack'},
+  {n:'28',op:'mov',operands:'[rbp-8], EAX',type:'b-mov',desc:'store return value at local -8'},
+  {n:'29',op:'mov',operands:'[rbp-16], EAX',type:'b-mov',desc:'store a at local -16'},
+  {n:'30',op:'mov',operands:'[rbp-24], EAX',type:'b-mov',desc:'store a at local -24'},
+  {n:'31',op:'add',operands:'[rbp-24], 1',type:'b-arith',desc:'increment local -24 (a+1)'},
+  {n:'32',op:'mov',operands:'EAX, [rbp-24]',type:'b-mov',desc:'load incremented value → EAX'},
+  {n:'33',op:'jmp',operands:'L2',type:'b-jmp',desc:'jump over else to L2'},
+  {s:'LABEL L1 — ELSE BRANCH (condition false)'},
+  {lbl:'L1:'},
+  {n:'34',op:'mov',operands:'[rbp-32], EAX',type:'b-mov',desc:'store a at local -32'},
+  {n:'35',op:'sub',operands:'[rbp-32], 1',type:'b-arith',desc:'decrement local -32 (a-1)'},
+  {n:'36',op:'mov',operands:'ESI, [rbp-32]',type:'b-mov',desc:'ESI = a - 1 (sum updated)'},
+  {s:'LABEL L2 — MERGE POINT'},
+  {lbl:'L2:'},
+  {n:'37',op:'mov',operands:'[rbp-40], 0',type:'b-mov',desc:'i = 0  (loop init)'},
+  {s:'LOOP: for i < 10'},
+  {lbl:'L3:'},
+  {n:'38',op:'mov',operands:'[rbp-48], [rbp-40]',type:'b-mov',desc:'load i into temp'},
+  {n:'39',op:'cmp',operands:'[rbp-48], 10',type:'b-cmp',desc:'compare i with 10'},
+  {n:'40',op:'setl',operands:'al',type:'b-misc',desc:'al = 1 if i < 10'},
+  {n:'41',op:'movzx',operands:'[rbp-48], al',type:'b-mov',desc:'store bool into temp'},
+  {n:'42',op:'cmp',operands:'[rbp-48], 0',type:'b-cmp',desc:'test loop condition'},
+  {n:'43',op:'jne',operands:'L4',type:'b-jmp',desc:'if i<10 → continue loop'},
+  {n:'44',op:'jmp',operands:'L5',type:'b-jmp',desc:'else → exit loop'},
+  {s:'LABEL L4 — LOOP BODY'},
+  {lbl:'L4:'},
+  {n:'45',op:'mov',operands:'[rbp-56], ESI',type:'b-mov',desc:'load sum into temp'},
+  {n:'46',op:'add',operands:'[rbp-56], [rbp-40]',type:'b-arith',desc:'sum = sum + i'},
+  {n:'47',op:'mov',operands:'ESI, [rbp-56]',type:'b-mov',desc:'store updated sum → ESI'},
+  {n:'48',op:'mov',operands:'[rbp-64], [rbp-40]',type:'b-mov',desc:'save i to local -64'},
+  {n:'49',op:'mov',operands:'[rbp-72], [rbp-40]',type:'b-mov',desc:'copy i to local -72'},
+  {n:'50',op:'add',operands:'[rbp-72], 1',type:'b-arith',desc:'i++'},
+  {n:'51',op:'mov',operands:'[rbp-40], [rbp-72]',type:'b-mov',desc:'store incremented i'},
+  {n:'52',op:'jmp',operands:'L3',type:'b-jmp',desc:'back to loop header'},
+  {s:'LABEL L5 — LOOP EXIT'},
+  {lbl:'L5:'},
+  {s:'WHILE LOOP: while a > 0'},
+  {lbl:'L6:'},
+  {n:'53',op:'mov',operands:'[rbp-80], EAX',type:'b-mov',desc:'store a into temp'},
+  {n:'54',op:'cmp',operands:'[rbp-80], 0',type:'b-cmp',desc:'compare a with 0'},
+  {n:'55',op:'setg',operands:'al',type:'b-misc',desc:'al = 1 if a > 0'},
+  {n:'56',op:'movzx',operands:'[rbp-80], al',type:'b-mov',desc:'store bool into temp'},
+  {n:'57',op:'cmp',operands:'[rbp-80], 0',type:'b-cmp',desc:'test while condition'},
+  {n:'58',op:'jne',operands:'L7',type:'b-jmp',desc:'if a>0 → continue while'},
+  {n:'59',op:'jmp',operands:'L8',type:'b-jmp',desc:'else → exit while'},
+  {s:'LABEL L7 — WHILE BODY'},
+  {lbl:'L7:'},
+  {n:'60',op:'mov',operands:'[rbp-88], EAX',type:'b-mov',desc:'save a'},
+  {n:'61',op:'mov',operands:'[rbp-96], EAX',type:'b-mov',desc:'copy a to temp'},
+  {n:'62',op:'sub',operands:'[rbp-96], 1',type:'b-arith',desc:'a = a - 1'},
+  {n:'63',op:'mov',operands:'EAX, [rbp-96]',type:'b-mov',desc:'load decremented a → EAX'},
+  {n:'64',op:'jmp',operands:'L6',type:'b-jmp',desc:'back to while header'},
+  {s:'LABEL L8 — WHILE EXIT / FUNCTION RETURN'},
+  {lbl:'L8:'},
+  {n:'65',op:'mov',operands:'EAX, 0',type:'b-mov',desc:'return 0'},
+  {n:'66',op:'leave',operands:'',type:'b-stack',desc:'restore stack frame (mov rsp,rbp + pop rbp)'},
+  {n:'67',op:'ret',operands:'',type:'b-ret',desc:'return to caller'},
+];
+
+const tbody=document.getElementById('tbody');
+rows.forEach(r=>{
+  const tr=document.createElement('tr');
+  if(r.s){
+    tr.className='row-section';
+    tr.innerHTML='<td colspan="5">'+r.s+'</td>';
+  } else if(r.lbl){
+    tr.className='row-label';
+    tr.innerHTML='<td colspan="5">'+r.lbl+'</td>';
+  } else {
+    tr.innerHTML='<td class="lineno">'+r.n+'</td><td class="instr">'+r.op+'</td><td class="operands">'+r.operands+'</td><td><span class="badge '+r.type+'">'+r.op.toUpperCase()+'</span></td><td class="comment-cell">; '+r.desc+'</td>';
+  }
+  tbody.appendChild(tr);
+});
+</script>
+</body>
+</html>
